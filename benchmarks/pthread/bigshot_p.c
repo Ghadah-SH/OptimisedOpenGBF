@@ -1,20 +1,9 @@
-// This file is part of the SV-Benchmarks collection of verification tasks:
-// https://github.com/sosy-lab/sv-benchmarks
-//
-// SPDX-FileCopyrightText: 2011-2020 The SV-Benchmarks community
-// SPDX-FileCopyrightText: The CSeq project
-//
-// SPDX-License-Identifier: Apache-2.0
-
-extern void abort(void);
-#include <assert.h>
-void reach_error() { assert(0); }
-
 #include <stdlib.h>
 #include <pthread.h>
 #include <string.h>
+#include <stdio.h>
 
-void __VERIFIER_assert(int expression) { if (!expression) { ERROR: {reach_error();abort();}}; return; }
+extern void abort(void);
 
 char *v;
 
@@ -30,7 +19,6 @@ void *thread2(void *arg)
   return 0;
 }
 
-
 int main()
 {
   pthread_t t1, t2;
@@ -40,7 +28,13 @@ int main()
   pthread_join(t1, 0);
   pthread_join(t2, 0);
 
-  __VERIFIER_assert(!v || v[0] == 'B');
+  if (!v || v[0] == 'B') {
+    // Condition met, proceed normally
+  } else {
+    // Handle error case
+    printf("Error: Condition failed!\n");
+    abort();
+  }
 
   return 0;
 }

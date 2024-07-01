@@ -10,6 +10,12 @@
 #include "llvm/IR/PassManager.h"
 #include "delayPass.hpp"
 
+
+
+bool DelayPass::runOnFunction(llvm::Function &F) {
+return injectDelays(F);
+}
+
 llvm::StringRef DelayPass::getFunctionName(llvm::CallInst *callInst)
 {
     llvm::Function *calleeFunction = callInst->getCalledFunction();
@@ -74,47 +80,19 @@ bool DelayPass::instrumentThreadCounting(llvm::Instruction *I)
 }
 
 
-bool DelayPass::shouldAddDelayInstruction(llvm::Instruction *I, bool &should_add_delay )
-{
- /* There must be no non-phi instructions between the start
-    of a basic block and the PHI instructions.*/
+bool DelayPass::shouldInjectDelay(llvm::Instruction *I) {
+llvm::CallInst *callInst = llvm::dyn_cast<llvm::CallInst>(I);
+if (!callInst) return false; 
 
-    if (llvm::dyn_cast<llvm::PHINode>(I) != NULL)
-    {
-        return false;
-        
-    }
-    /*if the instruction is not belong to an atomic instruction return should_add_delay  */
-    llvm::CallInst *callInst = llvm::dyn_cast<llvm::CallInst>(&*I);
-    if (!callInst)
-    {
-        return should_add_delay;
-    }
-    
-    auto functionName = getFunctionName(callInst);
-    /* If the function needs to be atomic we will return
-     * true to avoid adding delay function. If not, we return false. */
-    if (functionName == "__VERIFIER_atomic_begin")
-    {
-        should_add_delay = false;
-    }
-    //return true;
-    else if (functionName == "__VERIFIER_atomic_end")
-    {
-       should_add_delay = true;
-       return false;
-    }
-    /* #TODO: we are not supporting other __VERIFIER_atomic functions
-     * if function starts with ___ VERIFIER atomic _* we will abort,
-     * since we are * not supporting these functions
-     */
-    else if (functionName.startswith("__VERIFIER_atomic"))
-    {
-        llvm::errs() << "We do not support " << functionName;
-        abort();
-    }
+llvm::StringRef functionName = getFunctionName(callInst);
+if(functionName == "pthread_mutex_lock" || functionName == "pthread_mutex_unlock" || functionName == "pthread_create" || functionName == "pthread_join") {
+return true;
 
-    return should_add_delay;
+}
+return false;
+
+
+
 }
 
 
@@ -125,7 +103,7 @@ Ctx = &F.getContext();
 currentFunction = &F;
 initializeEBFFunctions();
 bool inserted = false;
-bool should_add_delay=true;
+
 
     /* iterate for each function and each basicblock */
     for (llvm::Function::iterator bb = F.begin(), e = F.end(); bb != e; ++bb)
@@ -135,18 +113,21 @@ bool should_add_delay=true;
             /* get instruction i*/
             llvm::Instruction *I = &*i;
             /* */
+            //Instrument thread counting logic
             instrumentThreadCounting(I);
-            if (shouldAddDelayInstruction(I, should_add_delay))
-            {
-                /* insert a call to the delay function. */
+            if (shouldInjectDelay(I))
+            { /* insert a call to the delay function. */
                 llvm::IRBuilder<> builder(I);
+                
+                // Insert a call to the delay function right before the instruction 
+                builder.SetInsertPoint(I);
                 builder.CreateCall(delayF);
                 inserted = true;
             }
 
         }
 
-    }
+}    
         return inserted;
 
 }

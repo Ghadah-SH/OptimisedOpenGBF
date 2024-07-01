@@ -1,0 +1,12 @@
+[
+{
+  "directory": "/home/ghada/Improved_EBF2/pass/build/default",
+  "command": "/usr/bin/c++ -DMemoryTrackPass_EXPORTS -I/usr/lib/llvm-11/include -fPIC   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -fno-rtti -std=gnu++14 -o CMakeFiles/MemoryTrackPass.dir/MemoryTrackPass.cpp.o -c /home/ghada/Improved_EBF2/pass/MemoryTrackPass.cpp",
+  "file": "/home/ghada/Improved_EBF2/pass/MemoryTrackPass.cpp"
+},
+{
+  "directory": "/home/ghada/Improved_EBF2/pass/build/default",
+  "command": "/usr/bin/c++ -DMemoryTrackPass_EXPORTS -I/usr/lib/llvm-11/include -fPIC   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -fno-rtti -std=gnu++14 -o CMakeFiles/MemoryTrackPass.dir/delayPass.cpp.o -c /home/ghada/Improved_EBF2/pass/delayPass.cpp",
+  "file": "/home/ghada/Improved_EBF2/pass/delayPass.cpp"
+}
+]

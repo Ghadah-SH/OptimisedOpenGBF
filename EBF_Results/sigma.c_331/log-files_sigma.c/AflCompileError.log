@@ -1,0 +1,14 @@
+/home/ghada/Improved_EBF2/input.c:44:22: warning: incompatible pointer to integer conversion passing 'pthread_t *' (aka 'unsigned long *') to parameter of type 'int' [-Wint-conversion]
+        assume_abort_if_not(t);
+                            ^
+/home/ghada/Improved_EBF2/input.c:10:30: note: passing argument to parameter 'cond' here
+void assume_abort_if_not(int cond) {
+                             ^
+/home/ghada/Improved_EBF2/input.c:45:22: warning: incompatible pointer to integer conversion passing 'int *' to parameter of type 'int'; dereference with * [-Wint-conversion]
+        assume_abort_if_not(array);
+                            ^~~~~
+                            *
+/home/ghada/Improved_EBF2/input.c:10:30: note: passing argument to parameter 'cond' here
+void assume_abort_if_not(int cond) {
+                             ^
+2 warnings generated.

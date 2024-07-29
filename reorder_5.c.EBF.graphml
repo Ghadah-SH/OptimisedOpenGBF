@@ -41,12 +41,12 @@
 	<graph edgedefault="directed">
 		<data key="producer">EBF</data>
 		<data key="sourcecodelang">C</data>
-		<data key="programfile">benchmarks/pthread/lazy01.c</data>
-		<data key="programhash">bfea4678daad8114ef6a8d147d72de07e7b5a33c83560c1b2b84eeb110fd312c</data>
+		<data key="programfile">benchmarks/pthread/reorder_5.c</data>
+		<data key="programhash">25b8fb3a08b7530810119a74752da7baa6b70775f6d61e27e9765556ee2c7b0c</data>
 		<data key="specification">CHECK( init(main()), LTL(G ! call(reach_error())) )</data>
 		<data key="architecture">32bit</data>
-		<data key="creationtime">2024-07-25T18:34:28Z</data>
-		<data key="witness-type">violation_witness</data>
+		<data key="creationtime">2024-07-25T12:53:13Z</data>
+		<data key="witness-type">correctness_witness</data>
 		<node id="N0">
 			<data key="entry">true</data>
 		</node>

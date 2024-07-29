@@ -1,0 +1,10 @@
+# environment variables:
+AFL_BENCH_UNTIL_CRASH=1
+AFL_CC=/usr/bin/clang-14
+AFL_CUSTOM_INFO_PROGRAM=/home/ghada/Improved_EBF2_coinToss/EBF_Results/singleton.c_831/Executable-Dir_singleton.c/singleton_AFL
+AFL_CUSTOM_INFO_PROGRAM_ARGV=
+AFL_CUSTOM_INFO_OUT=/home/ghada/Improved_EBF2_coinToss/EBF_Results/singleton.c_831/AFL-Results_singleton.c/default
+AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES=1
+AFL_SKIP_CPUFREQ=1
+# command line:
+'/home/ghada/Improved_EBF2_coinToss/fuzzEngine/AFLplusplus/afl-fuzz' '-i' '/home/ghada/Improved_EBF2_coinToss/EBF_Results/singleton.c_831/CORPUS_singleton.c' '-o' '/home/ghada/Improved_EBF2_coinToss/EBF_Results/singleton.c_831/AFL-Results_singleton.c' '-m' 'none' '-t' '3000+' '--' '/home/ghada/Improved_EBF2_coinToss/EBF_Results/singleton.c_831/Executable-Dir_singleton.c/singleton_AFL'

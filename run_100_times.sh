@@ -4,7 +4,7 @@
 PYTHON_SCRIPT="./scripts/RunEBF.py"
 
 # Arguments for the Python script
-PYTHON_ARGS="-a 32 -p property-file/reach benchmarks/pthread/queue.c"
+PYTHON_ARGS="-a 32 -p property-file/reach benchmarks/pthread/lazy01.c"
 
 # Initialize variables to store total time and total time squared
 total_time=0

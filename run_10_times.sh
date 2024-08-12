@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Path to your Python script
+
 PYTHON_SCRIPT="./scripts/RunEBF.py"
 
-# Arguments for the Python script
+
 PYTHON_ARGS="-a 32 -p property-file/reach benchmarks/pthread/sigma.c"
 
 # Initialize variables to store total time and total time squared
@@ -13,7 +13,7 @@ total_time_squared=0
 # Record the overall start time
 overall_start_time=$(date +%s.%N)
 
-# Loop 100 times
+# Loop 10 times
 for i in {1..10}
 do
     echo "Running iteration $i"

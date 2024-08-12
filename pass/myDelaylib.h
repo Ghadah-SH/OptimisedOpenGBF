@@ -1,3 +1,4 @@
+// This is a modified version of myDelaylib.h to mainpulate the delay value.
 
 
 /**
@@ -11,7 +12,7 @@ void add_thread();
 */
 void join_thread();
 
-
+int __VERIFIER_CUSTOM_delay(); 
 /**
  * This function will run the delay.
 */

@@ -1,3 +1,5 @@
+// this is a modified version of myDelaylib.h to implement Random Distribution delay injection method. 
+
 #ifndef MY_DELAY_LIB_H
 #define MY_DELAY_LIB_H
 #include <stdbool.h>

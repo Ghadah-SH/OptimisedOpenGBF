@@ -1,3 +1,5 @@
+//this is a modified version of delayPass.cpp to implement Instruction Skipping Delay Injection method
+
 #include "llvm/Pass.h"
 #include "llvm/IR/Function.h"
 #include "llvm/Support/raw_ostream.h"
@@ -9,12 +11,6 @@
 #include "llvm/Transforms/Utils/Local.h"
 #include "llvm/IR/PassManager.h"
 #include "delayPass.hpp"
-
-
-
-bool DelayPass::runOnFunction(llvm::Function &F) {
-return injectDelays(F);
-}
 
 llvm::StringRef DelayPass::getFunctionName(llvm::CallInst *callInst)
 {
@@ -80,19 +76,47 @@ bool DelayPass::instrumentThreadCounting(llvm::Instruction *I)
 }
 
 
-bool DelayPass::shouldInjectDelay(llvm::Instruction *I) {
-llvm::CallInst *callInst = llvm::dyn_cast<llvm::CallInst>(I);
-if (!callInst) return false; 
+bool DelayPass::shouldAddDelayInstruction(llvm::Instruction *I, bool &should_add_delay )
+{
+ /* There must be no non-phi instructions between the start
+    of a basic block and the PHI instructions.*/
 
-llvm::StringRef functionName = getFunctionName(callInst);
-if(functionName == "pthread_mutex_lock" || functionName == "pthread_mutex_unlock" || functionName == "pthread_create" || functionName == "pthread_join") {
-return true;
+    if (llvm::dyn_cast<llvm::PHINode>(I) != NULL)
+    {
+        return false;
+        
+    }
+    /*if the instruction is not belong to an atomic instruction return should_add_delay  */
+    llvm::CallInst *callInst = llvm::dyn_cast<llvm::CallInst>(&*I);
+    if (!callInst)
+    {
+        return should_add_delay;
+    }
+    
+    auto functionName = getFunctionName(callInst);
+    /* If the function needs to be atomic we will return
+     * true to avoid adding delay function. If not, we return false. */
+    if (functionName == "__VERIFIER_atomic_begin")
+    {
+        should_add_delay = false;
+    }
+    //return true;
+    else if (functionName == "__VERIFIER_atomic_end")
+    {
+       should_add_delay = true;
+       return false;
+    }
+    /* #TODO: we are not supporting other __VERIFIER_atomic functions
+     * if function starts with ___ VERIFIER atomic _* we will abort,
+     * since we are * not supporting these functions
+     */
+    else if (functionName.startswith("__VERIFIER_atomic"))
+    {
+        llvm::errs() << "We do not support " << functionName;
+        abort();
+    }
 
-}
-return false;
-
-
-
+    return should_add_delay;
 }
 
 
@@ -103,33 +127,51 @@ Ctx = &F.getContext();
 currentFunction = &F;
 initializeEBFFunctions();
 bool inserted = false;
+bool should_add_delay=true;
+
+
+llvm::errs()<<"Processing function: " << F.getName() << "\n"; //Debugging 
 
 
     /* iterate for each function and each basicblock */
     for (llvm::Function::iterator bb = F.begin(), e = F.end(); bb != e; ++bb)
     {
+    
+      llvm::errs() << "  Basic block index: " << std::distance(F.begin(), bb) << "\n";
+            
+            
         for (llvm::BasicBlock::iterator i = bb->begin(), e = bb->end(); i != e; ++i)
         {
+        
+
+        if(skipCounter % skipCount != 0){
+        skipCounter++; 
+        continue;  // skip further processing of this intruction
+        }
+        
             /* get instruction i*/
             llvm::Instruction *I = &*i;
             /* */
-            //Instrument thread counting logic
+                     //   llvm::errs() << "    Instruction index: " << std::distance(bb->begin(), i) << " - " << *I << "\n";
+            
             instrumentThreadCounting(I);
-            if (shouldInjectDelay(I))
-            { /* insert a call to the delay function. */
-                llvm::IRBuilder<> builder(I);
-                
-                // Insert a call to the delay function right before the instruction 
-                builder.SetInsertPoint(I);
-                builder.CreateCall(delayF);
-                inserted = true;
+            
+            
+            if (shouldAddDelayInstruction(I, should_add_delay)) {
+            
+            // Insert a call to the delay function . 
+            llvm::IRBuilder <> builder(I); 
+            builder.CreateCall(delayF);
+            inserted = true; 
+             
+         //   llvm::errs() << "    Inserted delay at instruction index: " << std::distance(bb->begin(), i) << "\n";
+            } 
             }
-
-        }
-
-}    
-        return inserted;
-
+            }
+            
+           return inserted; 
+            
+      
 }
 
 

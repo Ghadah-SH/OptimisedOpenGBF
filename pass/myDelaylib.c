@@ -1,3 +1,6 @@
+// this is a modified version of myDelaylib.c to implement Random Distribution delay injection method. 
+
+
 #include <stdlib.h>
 #include <time.h>
 #include <stdio.h>

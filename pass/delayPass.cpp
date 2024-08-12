@@ -1,3 +1,5 @@
+//this is a modified version of delayPass.cpp, that inject delays after the I that meets criteria.
+
 #include "llvm/Pass.h"
 #include "llvm/IR/Function.h"
 #include "llvm/Support/raw_ostream.h"
@@ -9,6 +11,7 @@
 #include "llvm/Transforms/Utils/Local.h"
 #include "llvm/IR/PassManager.h"
 #include "delayPass.hpp"
+#include <random>
 
 
 
@@ -79,20 +82,24 @@ bool DelayPass::instrumentThreadCounting(llvm::Instruction *I)
     return true;
 }
 
+// Decided when to inject dealys + introduce randomness in the insertion point within the critical areas. 
 
 bool DelayPass::shouldInjectDelay(llvm::Instruction *I) {
-llvm::CallInst *callInst = llvm::dyn_cast<llvm::CallInst>(I);
-if (!callInst) return false; 
+    static std::default_random_engine generator;
+    static std::uniform_int_distribution<int> distribution(0, 9);  // 10% chance
 
-llvm::StringRef functionName = getFunctionName(callInst);
-if(functionName == "pthread_mutex_lock" || functionName == "pthread_mutex_unlock" || functionName == "pthread_create" || functionName == "pthread_join") {
-return true;
+    // Randomly decide to inject delay
+    if (distribution(generator) == 0) {  // Approximately 10% chance
+        llvm::CallInst *callInst = llvm::dyn_cast<llvm::CallInst>(I);
+        if (!callInst) return false;
 
-}
-return false;
-
-
-
+        llvm::StringRef functionName = getFunctionName(callInst);
+        return functionName == "pthread_mutex_lock" ||
+               functionName == "pthread_mutex_unlock" || 
+               functionName == "pthread_create" || 
+               functionName == "pthread_join";
+    }
+    return false;
 }
 
 
@@ -112,21 +119,25 @@ bool inserted = false;
         {
             /* get instruction i*/
             llvm::Instruction *I = &*i;
-            /* */
+    
             //Instrument thread counting logic
             instrumentThreadCounting(I);
+            // Search for matching crietia within Instructions 
             if (shouldInjectDelay(I))
             { /* insert a call to the delay function. */
                 llvm::IRBuilder<> builder(I);
+
                 
-                // Insert a call to the delay function right before the instruction 
-                builder.SetInsertPoint(I);
+           	
+// Move the insert point to the instruction after the current one inorder to add delay after I that match the crietira
+           	llvm::Instruction *nextInst = &*(++i);
+           	 --i; 
+                builder.SetInsertPoint(nextInst);
                 builder.CreateCall(delayF);
-                inserted = true;
+           	 
+           	inserted = true;
             }
-
         }
-
 }    
         return inserted;
 

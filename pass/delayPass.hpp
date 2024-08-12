@@ -1,3 +1,6 @@
+//this is a modified version of delayPass.hpp to implement Instruction Skipping Delay Injection method
+
+
 #ifndef EBF_DELAY_PASS
 #define EBF_DELAY_PASS
 
@@ -19,15 +22,11 @@ struct DelayPass : public llvm::FunctionPass
 
     /** @return whether the function `F` has changed */
 
-    bool runOnFunction(llvm::Function &F) override; 
-    llvm::StringRef getFunctionName(llvm::CallInst *callInst);
-    void initializeEBFFunctions();
-    bool instrumentThreadCounting(llvm::Instruction *I);
-    bool shouldAddDelayInstruction(llvm::Instruction *I, bool &should_add_delay );
-    bool shouldInjectDelay(llvm::Instruction *I); // New method for selective delay injection
-    bool injectDelays(llvm::Function &F);
-    
-    
+    bool runOnFunction(llvm::Function &F) override
+    {
+        return injectDelays(F);
+    }
+
 protected:
     llvm::LLVMContext *Ctx;
     llvm::Function *currentFunction;
@@ -38,30 +37,32 @@ protected:
     llvm::FunctionCallee addF;
     llvm::FunctionCallee joinF;
     llvm::FunctionCallee delayF;
+    int skipCounter = 0; 
+    const int skipCount = 10; //Default Value, can be change to experiment
 
     /** This flag control wether inject a delay or not*/
    // bool should_add_delay = true;
-   // void initializeEBFFunctions();
+    void initializeEBFFunctions();
 
     /** @brief This function get the the callee function
      * @return the name of the function */
-  //  llvm::StringRef getFunctionName(llvm::CallInst *callInst);
+    llvm::StringRef getFunctionName(llvm::CallInst *callInst);
 
     /** @brief This function check for pthread_create and pthread_join functions, if they exists then 
      * we insert a call to insert a call to a function that count the active and release threads respectivally.
      * @return true if the call has been inserted*/
-   // bool instrumentThreadCounting(llvm::Instruction *I);
+    bool instrumentThreadCounting(llvm::Instruction *I);
     
     /** @brief This function check for __VERIFIER_atomic functions, updating `should_add_delay` as needed.
      * @return true if the current instruction needs a delay after.*/
     
-  //  bool shouldAddDelayInstruction(llvm::Instruction *I, bool &should_add_delay );
+    bool shouldAddDelayInstruction(llvm::Instruction *I, bool &should_add_delay );
     /**  @brief this function will define a delay function to be instrumented.
      * It will iterate over all the instructions, instrumenting the delay as needed.
      * This function will insert a delay function and return true if the function was modified
      * @return whether the function `F` has changed */
 
-  //  bool injectDelays(llvm::Function &F);
+    bool injectDelays(llvm::Function &F);
 
 };
 
